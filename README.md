@@ -4,6 +4,8 @@
 Repositório para a disciplina de Projeto de Software  
 Engenharia de computação - UFAL  
 ---
+### Passo a passo para executar   
+
 1. `git clone <url do repositório>`  
 
 O banco de dados para a primeira parte do projeto começou a ser implementado para cadastro e login, pelo uso do **PostgreSQL** e hospedagem no **NeonConsole**. Para ter acesso à tabela gerada:
@@ -12,7 +14,7 @@ O banco de dados para a primeira parte do projeto começou a ser implementado pa
 3. Utilize essa URL no seu arquivo **.env**. 
 
 O script para envio do e-mail requer que você defina um e-mail **Gmail**  como remetente. Para isso, você precisará acessar/gerar sua senha de app (não é a senha da conta) em:
-1. [Minha Conta - Google](myaccount.google.com)
+1. [Minha Conta - Google](https://myaccount.google.com/)
 2. Segurança -> Senhas de app   
 - **Obs.:** A verificação em duas etapas precisa estar ativa.
 

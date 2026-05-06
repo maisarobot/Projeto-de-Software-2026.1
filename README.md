@@ -137,3 +137,31 @@ Chamada do método:
 - O polimorfismo acontece quando o usuário seleciona a opção de ver o progresso de leitura para o livro selecionado. Antes disso, no momento em que ele especifica o tipo de leitura ao adicionar na biblioteca, o sistema irá pedir a duração total (Audiobook) ou o total de páginas (LivroFisico_Ebook) e armazenar. Para cada caso, o método será implementado de forma distinta ao ser chamado. Um precisará passar pela conversão de tempo usando a biblioteca `datetime` e o outro poderá calcular a porcentagem diretamente. Ambos também informam quando a leitura estiver marcada como 100% concluída.
 - O objeto (livro selecionado pelo índice) é armazenado em `livro_escolhido` e o método `progresso_leitura` é acionado sem distinção na hora da chamada. O tratamento diferente ocorrerá apenas dentro das determinadas classes.
 - O uso do polimorfismo é essencial para reuso de código e gerenciamento de objetos na funcionalidade existente e para futuras implementações.
+
+
+## Problema identificado no código
+
+Sem a aplicação do padrão criacional **Factory Method**, a criação dos objetos de leitura estava concentrada diretamente dentro da classe `Biblioteca_Pessoal`, no método `adicionar_leitura`.
+
+Nesse método, a própria biblioteca precisava decidir qual tipo de objeto deveria ser criado, utilizando estruturas condicionais para verificar o formato da leitura:
+
+```python
+def adicionar_leitura(self, livro, formato, total_paginas=None, narrador=None, tempo_total=None):
+    if formato == 1:
+        leitura = LivroFisico_Ebook(livro, total_paginas)
+    elif formato == 2:
+        leitura = Audiobook(livro, narrador, tempo_total)
+
+    self.lista_leituras.append(leitura)
+    return leitura
+```
+
+O principal problema dessa abordagem é que a classe `Biblioteca_Pessoal` passa a ter mais de uma responsabilidade. Além de gerenciar a lista de leituras do usuário, ela também fica responsável por saber como cada tipo de leitura deve ser criado.
+
+Isso gera um maior acoplamento entre a biblioteca e as classes concretas `LivroFisico_Ebook` e `Audiobook`. Dessa forma, sempre que um novo formato de leitura precisar ser adicionado ao sistema, como por exemplo `RevistaDigital`, `PDF`, `HQ` ou `Kindle`, será necessário alterar diretamente o método `adicionar_leitura`.
+
+Essa situação dificulta a manutenção do código e fere o princípio Aberto/Fechado, pois a classe precisa ser modificada sempre que um novo tipo de leitura é criado.
+
+Outro problema é que, conforme o sistema cresce, o método tende a acumular cada vez mais condicionais, tornando o código menos organizado, menos flexível e mais difícil de testar.
+
+Por esse motivo, o padrão **Factory Method** foi escolhido. Ele permite separar a lógica de criação dos objetos em fábricas específicas, deixando a classe `Biblioteca_Pessoal` responsável apenas por gerenciar as leituras, e não por decidir como cada tipo de leitura deve ser instanciado.

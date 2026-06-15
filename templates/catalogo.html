@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo | Minha Estante{% endblock %}
+
+{% block content %}
+<section class="text-center py-6 fade-in">
+    <p class="text-muted text-lg">Escolha sua próxima leitura</p>
+    <h1 class="text-3xl md:text-5xl font-bold font-serif mt-2">
+        Catálogo de Livros
+    </h1>
+
+    <p class="text-muted text-sm mt-4 max-w-2xl mx-auto">
+        Busque livros por título, autor ou ISBN usando a Google Books API.
+    </p>
+</section>
+
+<section class="bg-card rounded-2xl p-6 border border-purple-900/50 fade-in mb-8 max-w-2xl mx-auto">
+    <form method="get" action="{{ url_for('pagina_catalogo') }}" class="space-y-4">
+        <div>
+            <label class="block text-sm text-muted mb-1">
+                Buscar livro
+            </label>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ termo or '' }}"
+                    placeholder="Ex: Frankenstein, Machado de Assis, 978..."
+                    required
+                    class="input-dark flex-1"
+                >
+
+                <button
+                    type="submit"
+                    class="bg-accent hover:bg-purple-600 px-5 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2"
+                >
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                    Buscar
+                </button>
+            </div>
+        </div>
+    </form>
+</section>
+
+{% if termo and not catalogo %}
+    <section class="text-center py-16 fade-in">
+        <i data-lucide="search-x" class="w-16 h-16 text-purple-800 mx-auto mb-4"></i>
+        <p class="text-muted text-lg">Nenhum livro encontrado</p>
+        <p class="text-purple-700 text-sm mt-1">
+            Tente buscar por outro título, autor ou ISBN.
+        </p>
+    </section>
+{% elif not termo %}
+    <section class="text-center py-16 fade-in">
+        <i data-lucide="book-open" class="w-16 h-16 text-purple-800 mx-auto mb-4"></i>
+        <p class="text-muted text-lg">Busque um livro para começar</p>
+        <p class="text-purple-700 text-sm mt-1">
+            Os resultados aparecerão aqui.
+        </p>
+    </section>
+{% else %}
+    <section class="mb-4">
+        <div class="flex items-center justify-between gap-3">
+            <div>
+                <h2 class="text-xl font-bold font-serif">
+                    Resultados da busca
+                </h2>
+
+                <p class="text-muted text-sm">
+                    Resultado para: <span class="text-white">“{{ termo }}”</span>
+                </p>
+            </div>
+
+            <span class="text-sm text-muted">
+                {{ catalogo|length }} livros
+            </span>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for livro in catalogo %}
+            <article class="book-card bg-card rounded-xl p-4 border border-purple-900/40 fade-in">
+                {% if livro.capa %}
+                    <img
+                        src="{{ livro.capa }}"
+                        alt="Capa de {{ livro.titulo }}"
+                        class="w-full h-56 object-cover rounded-lg mb-4 border border-purple-900/40 bg-surface"
+                    >
+                {% else %}
+                    <div class="w-full h-56 rounded-lg mb-4 border border-purple-900/40 bg-surface flex items-center justify-center">
+                        <i data-lucide="book-open" class="w-14 h-14 text-purple-800"></i>
+                    </div>
+                {% endif %}
+
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-primary text-white">
+                        Livro {{ livro.numero }}
+                    </span>
+
+                    <i data-lucide="book-open" class="w-5 h-5 text-accent"></i>
+                </div>
+
+                <h2 class="font-semibold text-white text-base mb-1 font-serif">
+                    {{ livro.titulo }}
+                </h2>
+
+                <p class="text-muted text-xs mb-3">
+                    {{ livro.autor }}
+                </p>
+
+                <div class="text-xs text-muted space-y-1 mb-3">
+                    {% if livro.editora %}
+                        <p>
+                            <span class="text-white">Editora:</span>
+                            {{ livro.editora }}
+                        </p>
+                    {% endif %}
+
+                    {% if livro.data_publicacao %}
+                        <p>
+                            <span class="text-white">Publicação:</span>
+                            {{ livro.data_publicacao }}
+                        </p>
+                    {% endif %}
+
+                    {% if livro.total_paginas %}
+                        <p>
+                            <span class="text-white">Páginas:</span>
+                            {{ livro.total_paginas }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <p class="text-muted text-sm leading-relaxed mb-4 line-clamp-custom">
+                    {{ livro.sinopse }}
+                </p>
+
+                <form method="post" action="{{ url_for('adicionar_catalogo') }}" class="space-y-3 catalog-form">
+                    <input type="hidden" name="termo" value="{{ termo or '' }}">
+                    <input type="hidden" name="numero" value="{{ livro.numero }}">
+                    <input type="hidden" name="titulo" value="{{ livro.titulo }}">
+                    <input type="hidden" name="autor" value="{{ livro.autor }}">
+                    <input type="hidden" name="sinopse" value="{{ livro.sinopse }}">
+
+                    <div>
+                        <label class="block text-sm text-muted mb-1">
+                            Tipo de leitura
+                        </label>
+
+                        <select name="tipo" class="input-dark tipo-leitura" required>
+                            <option value="fisico_ebook">Livro físico/Ebook</option>
+                            <option value="audiobook">Audiobook</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-paginas">
+                        <label class="block text-sm text-muted mb-1">
+                            Total de páginas
+                        </label>
+
+                        <input
+                            type="number"
+                            name="total_paginas"
+                            min="1"
+                            value="{{ livro.total_paginas or '' }}"
+                            placeholder="Ex: 320"
+                            class="input-dark"
+                        >
+                    </div>
+
+                    <div class="campo-audio hidden">
+                        <label class="block text-sm text-muted mb-1">
+                            Narrador(a)
+                        </label>
+
+                        <input
+                            type="text"
+                            name="narrador"
+                            placeholder="Ex: Guilherme Briggs"
+                            class="input-dark"
+                        >
+                    </div>
+
+                    <div class="campo-audio hidden">
+                        <label class="block text-sm text-muted mb-1">
+                            Tempo total
+                        </label>
+
+                        <input
+                            type="text"
+                            name="tempo_total"
+                            placeholder="HH:MM:SS"
+                            class="input-dark"
+                        >
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="w-full bg-accent hover:bg-purple-600 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2"
+                    >
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Adicionar
+                    </button>
+                </form>
+            </article>
+        {% endfor %}
+    </section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll(".catalog-form").forEach((form) => {
+        const tipo = form.querySelector(".tipo-leitura");
+        const camposPaginas = form.querySelectorAll(".campo-paginas");
+        const camposAudio = form.querySelectorAll(".campo-audio");
+
+        function atualizarCampos() {
+            const audiobook = tipo.value === "audiobook";
+
+            camposPaginas.forEach((campo) => {
+                campo.classList.toggle("hidden", audiobook);
+            });
+
+            camposAudio.forEach((campo) => {
+                campo.classList.toggle("hidden", !audiobook);
+            });
+        }
+
+        tipo.addEventListener("change", atualizarCampos);
+        atualizarCampos();
+    });
+</script>
+{% endblock %}

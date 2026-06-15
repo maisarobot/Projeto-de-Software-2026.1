@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Início | Minha Estante{% endblock %}
+
+{% block content %}
+<section class="text-center py-8 fade-in">
+    <p class="text-muted text-lg">Organize suas leituras</p>
+    <h1 class="text-3xl md:text-5xl font-bold font-serif mt-2">
+        Olá, {{ usuario_logado }}
+    </h1>
+</section>
+
+<section class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+    <article class="bg-card rounded-xl p-5 border border-purple-900/40 book-card">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-muted text-sm">Livros cadastrados</p>
+                <h2 class="text-3xl font-bold mt-1">{{ total_livros }}</h2>
+            </div>
+            <i data-lucide="books" class="w-9 h-9 text-accent"></i>
+        </div>
+    </article>
+
+    <article class="bg-card rounded-xl p-5 border border-purple-900/40 book-card">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-muted text-sm">Categorias criadas</p>
+                <h2 class="text-3xl font-bold mt-1">{{ total_categorias }}</h2>
+            </div>
+            <i data-lucide="folder" class="w-9 h-9 text-accent"></i>
+        </div>
+    </article>
+</section>
+
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <a href="{{ url_for('pagina_catalogo') }}" class="bg-card rounded-xl p-5 border border-purple-900/40 book-card">
+        <i data-lucide="plus-circle" class="w-8 h-8 text-accent mb-4"></i>
+        <h2 class="font-serif font-bold text-lg mb-1">Catálogo</h2>
+        <p class="text-muted text-sm">Adicionar novos livros.</p>
+    </a>
+
+    <a href="{{ url_for('biblioteca') }}" class="bg-card rounded-xl p-5 border border-purple-900/40 book-card">
+        <i data-lucide="library" class="w-8 h-8 text-accent mb-4"></i>
+        <h2 class="font-serif font-bold text-lg mb-1">Biblioteca</h2>
+        <p class="text-muted text-sm">Ver suas leituras.</p>
+    </a>
+
+    <a href="{{ url_for('categorias') }}" class="bg-card rounded-xl p-5 border border-purple-900/40 book-card">
+        <i data-lucide="folder-plus" class="w-8 h-8 text-accent mb-4"></i>
+        <h2 class="font-serif font-bold text-lg mb-1">Categorias</h2>
+        <p class="text-muted text-sm">Organizar livros.</p>
+    </a>
+
+    <a href="{{ url_for('retrospectiva') }}" class="bg-card rounded-xl p-5 border border-purple-900/40 book-card">
+        <i data-lucide="calendar-days" class="w-8 h-8 text-accent mb-4"></i>
+        <h2 class="font-serif font-bold text-lg mb-1">Retrospectiva</h2>
+        <p class="text-muted text-sm">Ver leituras por ano.</p>
+    </a>
+</section>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Livro | Minha Estante{% endblock %}
+
+{% block content %}
+<section class="text-center py-6 fade-in">
+    <p class="text-muted text-lg">Atualize sua leitura</p>
+    <h1 class="text-3xl md:text-5xl font-bold font-serif mt-2">
+        Editar Livro
+    </h1>
+</section>
+
+<section class="bg-card rounded-2xl p-6 border border-purple-900/50 max-w-3xl mx-auto fade-in">
+    <div class="mb-6">
+        <span class="text-xs px-2 py-0.5 rounded-full bg-primary text-white">
+            {{ "Audiobook" if leitura.__class__.__name__ == "Audiobook" else "Físico/Ebook" }}
+        </span>
+
+        <h2 class="text-xl font-bold font-serif mt-3">
+            {{ leitura.livro.titulo }}
+        </h2>
+
+        <p class="text-muted text-sm">
+            {{ leitura.livro.autor }}
+        </p>
+    </div>
+
+    <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-sm text-muted mb-1">Data de início</label>
+            <input type="text" name="inicio_leitura" placeholder="DD/MM/AAAA" value="{{ leitura.inicio_leitura.strftime('%d/%m/%Y') if leitura.inicio_leitura else '' }}" class="input-dark">
+        </div>
+
+        <div>
+            <label class="block text-sm text-muted mb-1">Data de conclusão</label>
+            <input type="text" name="final_leitura" placeholder="DD/MM/AAAA" value="{{ leitura.final_leitura.strftime('%d/%m/%Y') if leitura.final_leitura else '' }}" class="input-dark">
+        </div>
+
+        <div>
+            <label class="block text-sm text-muted mb-1">Nota</label>
+            <input type="number" name="nota" min="0" max="5" value="{{ leitura.nota if leitura.nota is not none else '' }}" class="input-dark">
+        </div>
+
+        <div>
+            <label class="block text-sm text-muted mb-1">Etiqueta</label>
+            <input type="text" name="etiqueta" value="{{ leitura.etiqueta or '' }}" class="input-dark">
+        </div>
+
+        <div class="md:col-span-2">
+            <label class="block text-sm text-muted mb-1">Resenha</label>
+            <textarea name="resenha" rows="5" class="input-dark resize-y">{{ leitura.resenha or '' }}</textarea>
+        </div>
+
+        {% if leitura.__class__.__name__ == "LivroFisico_Ebook" %}
+            <div>
+                <label class="block text-sm text-muted mb-1">Página atual</label>
+                <input type="number" name="pagina_atual" min="0" max="{{ leitura.total_paginas }}" value="{{ leitura.pagina_atual }}" class="input-dark">
+            </div>
+
+            <div>
+                <label class="block text-sm text-muted mb-1">Total de páginas</label>
+                <input type="text" value="{{ leitura.total_paginas }}" disabled class="input-dark opacity-60">
+            </div>
+        {% else %}
+            <div>
+                <label class="block text-sm text-muted mb-1">Tempo ouvido</label>
+                <input type="text" name="tempo_ouvido" placeholder="HH:MM:SS" value="{{ leitura.converter_segundos_para_tempo(leitura.tempo_ouvido) }}" class="input-dark">
+            </div>
+
+            <div>
+                <label class="block text-sm text-muted mb-1">Tempo total</label>
+                <input type="text" value="{{ leitura.converter_segundos_para_tempo(leitura.tempo_total) }}" disabled class="input-dark opacity-60">
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="block text-sm text-muted mb-1">Avaliação da narração</label>
+                <input type="text" name="nota_narracao" value="{{ leitura.nota_narracao or '' }}" class="input-dark">
+            </div>
+        {% endif %}
+
+        <div class="md:col-span-2 flex gap-3 pt-2">
+            <button type="submit" class="bg-accent hover:bg-purple-600 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors">
+                Salvar
+            </button>
+
+            <a href="{{ url_for('biblioteca') }}" class="bg-surface border border-purple-900/50 hover:text-white px-5 py-2.5 rounded-lg text-sm font-medium text-muted transition-colors">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</section>
+{% endblock %}

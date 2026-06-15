@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Biblioteca | Minha Estante{% endblock %}
+
+{% block content %}
+<section class="text-center py-6 fade-in">
+    <p class="text-muted text-lg">{{ titulo or "Organize suas leituras" }}</p>
+    <h1 class="text-3xl md:text-5xl font-bold font-serif mt-2">
+        Biblioteca Pessoal
+    </h1>
+</section>
+
+<nav class="w-full mb-6">
+    <div class="flex gap-6 border-b border-purple-900/40 text-sm font-medium overflow-x-auto">
+        <button class="tab-btn tab-active pb-3 text-accent whitespace-nowrap" data-tab="all">Todos</button>
+        <button class="tab-btn pb-3 text-muted hover:text-white whitespace-nowrap" data-tab="lendo">Lendo</button>
+        <button class="tab-btn pb-3 text-muted hover:text-white whitespace-nowrap" data-tab="lido">Lido</button>
+        <button class="tab-btn pb-3 text-muted hover:text-white whitespace-nowrap" data-tab="quero_ler">Quero Ler</button>
+    </div>
+</nav>
+
+<div class="flex justify-between items-center gap-3 mb-6">
+    <div class="flex gap-3 text-sm text-muted">
+        <span id="stat-total">{{ leituras|length }} livros</span>
+    </div>
+
+    <div class="flex gap-2">
+        <a href="{{ url_for('biblioteca_ordem_alfabetica') }}" class="bg-card hover:bg-purple-950/60 border border-purple-900/50 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            Ordem alfabética
+        </a>
+
+        <a href="{{ url_for('pagina_catalogo') }}" class="bg-accent hover:bg-purple-600 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Adicionar
+        </a>
+    </div>
+</div>
+
+{% if leituras %}
+    <section id="book-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for leitura in leituras %}
+            {% set progresso = leitura.calcular_porcentagem() %}
+
+            {% if leitura.final_leitura or progresso >= 100 %}
+                {% set status = "lido" %}
+                {% set status_label = "Lido" %}
+                {% set status_class = "bg-green-600" %}
+            {% elif progresso > 0 %}
+                {% set status = "lendo" %}
+                {% set status_label = "Lendo" %}
+                {% set status_class = "bg-yellow-600" %}
+            {% else %}
+                {% set status = "quero_ler" %}
+                {% set status_label = "Quero Ler" %}
+                {% set status_class = "bg-blue-600" %}
+            {% endif %}
+
+            {% set indice_real = biblioteca.lista_leituras.index(leitura) %}
+            {% set editar_url = url_for('editar_livro', indice=indice_real) %}
+
+            <article
+                class="book-card bg-card rounded-xl p-4 border border-purple-900/40 fade-in cursor-pointer"
+                data-status="{{ status }}"
+                data-card-url="{{ editar_url }}"
+                title="Clique para adicionar ou editar informações"
+            >
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs px-2 py-0.5 rounded-full text-white {{ status_class }}">
+                        {{ status_label }}
+                    </span>
+
+                    <form method="post" action="{{ url_for('excluir_livro', indice=indice_real) }}" class="delete-form">
+                        <button type="submit" class="text-muted hover:text-red-400" title="Excluir livro">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <h2 class="font-semibold text-white text-base mb-1 font-serif hover:text-accent transition-colors">
+                    {{ leitura.livro.titulo }}
+                </h2>
+
+                <p class="text-muted text-xs mb-3">
+                    {{ leitura.livro.autor }}
+                </p>
+
+                <div class="flex gap-0.5 mb-3">
+                    {% set nota = leitura.nota if leitura.nota is not none else 0 %}
+                    {% for estrela in range(1, 6) %}
+                        {% if estrela <= nota %}
+                            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+                        {% else %}
+                            <i data-lucide="star" class="w-4 h-4 text-purple-800"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <div class="flex justify-between text-xs text-muted mb-1">
+                        <span>Progresso</span>
+                        <span>{{ "%.1f"|format(progresso) }}%</span>
+                    </div>
+
+                    <div class="w-full h-2 bg-surface rounded-full overflow-hidden">
+                        <div class="h-full bg-accent rounded-full" style="width: {{ progresso }}%"></div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-muted space-y-1 mb-4">
+                    <p>
+                        <span class="text-white">Tipo:</span>
+                        {% if leitura.__class__.__name__ == "Audiobook" %}
+                            Audiobook
+                        {% else %}
+                            Físico/Ebook
+                        {% endif %}
+                    </p>
+
+                    <p>
+                        <span class="text-white">Etiqueta:</span>
+                        {{ leitura.etiqueta or "-" }}
+                    </p>
+
+                    {% if leitura.inicio_leitura %}
+                        <p>
+                            <span class="text-white">Início:</span>
+                            {{ leitura.inicio_leitura.strftime('%d/%m/%Y') }}
+                        </p>
+                    {% endif %}
+
+                    {% if leitura.final_leitura %}
+                        <p>
+                            <span class="text-white">Conclusão:</span>
+                            {{ leitura.final_leitura.strftime('%d/%m/%Y') }}
+                        </p>
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+
+    <div id="empty-filter-state" class="hidden text-center py-16">
+        <i data-lucide="library" class="w-16 h-16 text-purple-800 mx-auto mb-4"></i>
+        <p class="text-muted text-lg">Nenhum livro nessa aba</p>
+    </div>
+{% else %}
+    <section class="text-center py-16">
+        <i data-lucide="library" class="w-16 h-16 text-purple-800 mx-auto mb-4"></i>
+        <p class="text-muted text-lg">Nenhum livro ainda</p>
+        <p class="text-purple-700 text-sm mt-1 mb-5">Clique em "Adicionar" para começar</p>
+
+        <a href="{{ url_for('pagina_catalogo') }}" class="bg-accent hover:bg-purple-600 px-4 py-2 rounded-lg text-sm font-medium inline-flex items-center gap-2 transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Adicionar Livro
+        </a>
+    </section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const tabs = document.querySelectorAll(".tab-btn");
+    const cards = document.querySelectorAll(".book-card[data-status]");
+    const emptyFilter = document.getElementById("empty-filter-state");
+
+    tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+            tabs.forEach((item) => {
+                item.classList.remove("tab-active", "text-accent");
+                item.classList.add("text-muted");
+            });
+
+            tab.classList.add("tab-active", "text-accent");
+            tab.classList.remove("text-muted");
+
+            const currentTab = tab.dataset.tab;
+            let visibleCount = 0;
+
+            cards.forEach((card) => {
+                const shouldShow = currentTab === "all" || card.dataset.status === currentTab;
+                card.classList.toggle("hidden", !shouldShow);
+
+                if (shouldShow) {
+                    visibleCount++;
+                }
+            });
+
+            if (emptyFilter) {
+                emptyFilter.classList.toggle("hidden", visibleCount > 0);
+            }
+
+            lucide.createIcons();
+        });
+    });
+
+    document.querySelectorAll(".book-card[data-card-url]").forEach((card) => {
+        card.addEventListener("click", () => {
+            window.location.href = card.dataset.cardUrl;
+        });
+
+        card.querySelectorAll("a, button, form").forEach((element) => {
+            element.addEventListener("click", (event) => {
+                event.stopPropagation();
+            });
+        });
+    });
+
+    document.querySelectorAll(".delete-form").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+            const confirmar = confirm("Deseja remover este livro da biblioteca?");
+
+            if (!confirmar) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

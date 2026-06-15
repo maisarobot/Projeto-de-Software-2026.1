@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Categorias | Minha Estante{% endblock %}
+
+{% block content %}
+<section class="text-center py-6 fade-in">
+    <p class="text-muted text-lg">Organize por temas</p>
+    <h1 class="text-3xl md:text-5xl font-bold font-serif mt-2">
+        Categorias
+    </h1>
+</section>
+
+<section class="bg-card rounded-2xl p-6 border border-purple-900/50 fade-in mb-8 max-w-xl mx-auto">
+    <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+            <i data-lucide="folder-plus" class="w-5 h-5 text-white"></i>
+        </div>
+
+        <div>
+            <h2 class="text-lg font-bold font-serif">Criar categoria</h2>
+            <p class="text-muted text-sm">Crie uma pasta para organizar suas leituras.</p>
+        </div>
+    </div>
+
+    <form method="post" class="space-y-4">
+        <div>
+            <label class="block text-sm text-muted mb-1">Nome da categoria</label>
+            <input
+                type="text"
+                name="nome"
+                required
+                placeholder="Ex: Ficção científica, Favoritos, Faculdade..."
+                class="input-dark"
+            >
+        </div>
+
+        <button
+            type="submit"
+            class="w-full bg-accent hover:bg-purple-600 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2"
+        >
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Criar categoria
+        </button>
+    </form>
+</section>
+
+<section class="mb-4">
+    <div class="flex items-center justify-between gap-3">
+        <div>
+            <h2 class="text-xl font-bold font-serif">Categorias criadas</h2>
+            <p class="text-muted text-sm">Clique em uma categoria para gerenciar os livros dela.</p>
+        </div>
+
+        <span class="text-sm text-muted">
+            {{ biblioteca.lista_categorias|length }} categorias
+        </span>
+    </div>
+</section>
+
+{% if biblioteca.lista_categorias %}
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for categoria in biblioteca.lista_categorias %}
+            <a
+                href="{{ url_for('categoria_detalhe', indice_categoria=loop.index0) }}"
+                class="book-card bg-card rounded-xl p-4 border border-purple-900/40 fade-in block"
+            >
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-primary text-white">
+                        Categoria
+                    </span>
+
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-accent"></i>
+                </div>
+
+                <h3 class="font-semibold text-white text-base mb-2 font-serif">
+                    {{ categoria.nome }}
+                </h3>
+
+                <p class="text-muted text-sm">
+                    {{ categoria.leituras_adicionadas|length }}
+                    {% if categoria.leituras_adicionadas|length == 1 %}
+                        livro cadastrado
+                    {% else %}
+                        livros cadastrados
+                    {% endif %}
+                </p>
+
+                {% if categoria.leituras_adicionadas %}
+                    <div class="mt-4 pt-4 border-t border-purple-900/40">
+                        <p class="text-xs text-muted mb-2">Últimos livros:</p>
+
+                        <ul class="space-y-1">
+                            {% for leitura in categoria.leituras_adicionadas[:3] %}
+                                <li class="text-sm text-muted flex items-center gap-2">
+                                    <i data-lucide="book" class="w-3.5 h-3.5 text-accent"></i>
+                                    <span class="truncate">{{ leitura.livro.titulo }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </a>
+        {% endfor %}
+    </section>
+{% else %}
+    <div class="text-center py-16">
+        <i data-lucide="folder" class="w-16 h-16 text-purple-800 mx-auto mb-4"></i>
+        <p class="text-muted text-lg">Nenhuma categoria criada ainda</p>
+        <p class="text-purple-700 text-sm mt-1">Crie sua primeira categoria acima.</p>
+    </div>
+{% endif %}
+{% endblock %}

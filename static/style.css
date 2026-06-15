@@ -1,0 +1,102 @@
+body {
+    box-sizing: border-box;
+}
+
+.book-card {
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(107, 33, 168, 0.3);
+    border-color: rgba(168, 85, 247, 0.6);
+}
+
+.tab-active {
+    border-bottom: 3px solid #A855F7;
+    color: #A855F7;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.input-dark {
+    width: 100%;
+    background: #1E1028;
+    border: 1px solid rgba(88, 28, 135, 0.5);
+    border-radius: 0.5rem;
+    padding: 0.65rem 0.75rem;
+    color: white;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input-dark:focus {
+    border-color: #A855F7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.16);
+}
+
+.input-dark::placeholder {
+    color: #7e6b8c;
+}
+
+.input-dark:disabled {
+    cursor: not-allowed;
+}
+
+.line-clamp-custom {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+select.input-dark option {
+    background: #1E1028;
+    color: white;
+}
+
+textarea.input-dark {
+    min-height: 120px;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1E1028;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6B21A8;
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #A855F7;
+}

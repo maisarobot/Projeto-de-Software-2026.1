@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}{{ categoria.nome }} | Minha Estante{% endblock %}
+
+{% block content %}
+<section class="py-6 fade-in">
+    <a
+        href="{{ url_for('categorias') }}"
+        class="text-muted hover:text-white text-sm inline-flex items-center gap-2 mb-6 transition-colors"
+    >
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Voltar para categorias
+    </a>
+
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+            <p class="text-muted text-lg">Categoria</p>
+
+            <h1 class="text-3xl md:text-5xl font-bold font-serif mt-2">
+                {{ categoria.nome }}
+            </h1>
+
+            <p class="text-muted text-sm mt-3">
+                {{ categoria.leituras_adicionadas|length }}
+                {% if categoria.leituras_adicionadas|length == 1 %}
+                    livro nesta categoria
+                {% else %}
+                    livros nesta categoria
+                {% endif %}
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('pagina_catalogo') }}"
+            class="bg-card hover:bg-purple-950/60 border border-purple-900/50 px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
+        >
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Adicionar livro ao sistema
+        </a>
+    </div>
+</section>
+
+<section class="bg-card rounded-2xl p-6 border border-purple-900/50 fade-in mb-8">
+    <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
+            <i data-lucide="list-plus" class="w-5 h-5 text-white"></i>
+        </div>
+
+        <div>
+            <h2 class="text-lg font-bold font-serif">Adicionar livro nesta categoria</h2>
+            <p class="text-muted text-sm">Escolha um livro que já está na sua biblioteca pessoal.</p>
+        </div>
+    </div>
+
+    {% if biblioteca.lista_leituras %}
+        <form
+            method="post"
+            action="{{ url_for('adicionar_livro_categoria', indice_categoria=indice_categoria) }}"
+            class="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-end"
+        >
+            <div>
+                <label class="block text-sm text-muted mb-1">Livro</label>
+
+                <select name="indice_livro" required class="input-dark">
+                    {% for leitura in biblioteca.lista_leituras %}
+                        <option value="{{ loop.index0 }}">
+                            {{ leitura.livro.titulo }} — {{ leitura.livro.autor }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button
+                type="submit"
+                class="bg-accent hover:bg-purple-600 px-5 py-2.5 rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2"
+            >
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Adicionar
+            </button>
+        </form>
+    {% else %}
+        <div class="text-center py-10">
+            <i data-lucide="library" class="w-14 h-14 text-purple-800 mx-auto mb-4"></i>
+
+            <p class="text-muted text-lg">Sua biblioteca ainda está vazia.</p>
+
+            <p class="text-purple-700 text-sm mt-1 mb-5">
+                Para adicionar livros em uma categoria, primeiro adicione algum livro na biblioteca.
+            </p>
+
+            <a
+                href="{{ url_for('pagina_catalogo') }}"
+                class="bg-accent hover:bg-purple-600 px-4 py-2 rounded-lg text-sm font-medium inline-flex items-center gap-2 transition-colors"
+            >
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Abrir catálogo
+            </a>
+        </div>
+    {% endif %}
+</section>
+
+<section class="mb-4">
+    <h2 class="text-xl font-bold font-serif">Livros da categoria</h2>
+</section>
+
+{% if categoria.leituras_adicionadas %}
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for leitura in categoria.leituras_adicionadas %}
+            {% set progresso = leitura.calcular_porcentagem() %}
+
+            {% if leitura.final_leitura or progresso >= 100 %}
+                {% set status_label = "Lido" %}
+                {% set status_class = "bg-green-600" %}
+            {% elif progresso > 0 %}
+                {% set status_label = "Lendo" %}
+                {% set status_class = "bg-yellow-600" %}
+            {% else %}
+                {% set status_label = "Quero Ler" %}
+                {% set status_class = "bg-blue-600" %}
+            {% endif %}
+
+            {% set indice_real = biblioteca.lista_leituras.index(leitura) %}
+
+            <article class="book-card bg-card rounded-xl p-4 border border-purple-900/40 fade-in">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs px-2 py-0.5 rounded-full text-white {{ status_class }}">
+                        {{ status_label }}
+                    </span>
+
+                    <div class="flex gap-2">
+                        <a
+                            href="{{ url_for('editar_livro', indice=indice_real) }}"
+                            class="text-muted hover:text-accent"
+                            title="Editar informações"
+                        >
+                            <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        </a>
+
+                        <form
+                            method="post"
+                            action="{{ url_for('remover_livro_categoria', indice_categoria=indice_categoria, indice_livro=indice_real) }}"
+                            class="remove-category-form"
+                        >
+                            <button
+                                type="submit"
+                                class="text-muted hover:text-red-400"
+                                title="Remover da categoria"
+                            >
+                                <i data-lucide="x-circle" class="w-4 h-4"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <h3 class="font-semibold text-white text-base mb-1 font-serif">
+                    {{ leitura.livro.titulo }}
+                </h3>
+
+                <p class="text-muted text-xs mb-3">
+                    {{ leitura.livro.autor }}
+                </p>
+
+                <div class="flex gap-0.5 mb-3">
+                    {% set nota = leitura.nota if leitura.nota is not none else 0 %}
+
+                    {% for estrela in range(1, 6) %}
+                        {% if estrela <= nota %}
+                            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+                        {% else %}
+                            <i data-lucide="star" class="w-4 h-4 text-purple-800"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <div class="flex justify-between text-xs text-muted mb-1">
+                        <span>Progresso</span>
+                        <span>{{ "%.1f"|format(progresso) }}%</span>
+                    </div>
+
+                    <div class="w-full h-2 bg-surface rounded-full overflow-hidden">
+                        <div class="h-full bg-accent rounded-full" style="width: {{ progresso }}%"></div>
+                    </div>
+                </div>
+
+                <div class="text-xs text-muted space-y-1">
+                    <p>
+                        <span class="text-white">Tipo:</span>
+                        {% if leitura.__class__.__name__ == "Audiobook" %}
+                            Audiobook
+                        {% else %}
+                            Físico/Ebook
+                        {% endif %}
+                    </p>
+
+                    <p>
+                        <span class="text-white">Etiqueta:</span>
+                        {{ leitura.etiqueta or "-" }}
+                    </p>
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+{% else %}
+    <div class="text-center py-16">
+        <i data-lucide="folder-open" class="w-16 h-16 text-purple-800 mx-auto mb-4"></i>
+        <p class="text-muted text-lg">Nenhum livro nesta categoria</p>
+        <p class="text-purple-700 text-sm mt-1">Use o formulário acima para adicionar um livro.</p>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll(".remove-category-form").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+            const confirmar = confirm("Deseja remover este livro desta categoria?");
+
+            if (!confirmar) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}
